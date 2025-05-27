@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview",
-    "start": "node server/index.js"
+   "server": "nodemon server/index.js",
+    "server:dev": "nodemon server/index.js",
+    "start": "npm run build && concurrently \"npm run server\" \"npm run dev\"",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",

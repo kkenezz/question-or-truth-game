@@ -6,13 +6,17 @@ import { type CardType, type ActionType } from '../types/game';
 
 // Get the current hostname and port for dynamic connection URL
 const getSocketUrl = () => {
-  // Development environment
-  if (import.meta.env.DEV) {
-    return 'http://localhost:3001';
+  const hostname = window.location.hostname;
+  const port = import.meta.env.DEV ? '3001' : window.location.port;
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  
+  // Handle webcontainer environment
+  if (hostname.includes('webcontainer-api.io')) {
+    return `${protocol}//${hostname.replace('5173', '3001')}`;
   }
   
-  // Production environment (Render)
-  return import.meta.env.VITE_BACKEND_URL || 'https://question-or-truth-backend.onrender.com';
+  // Local development or production
+  return import.meta.env.DEV ? `${protocol}//localhost:${port}` : window.location.origin;
 };
 
 class SocketService {
