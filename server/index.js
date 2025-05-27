@@ -13,11 +13,12 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const server = http.createServer(app);
 
-// Update CORS configuration
+// Update CORS configuration for Render
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3001',
-  /\.webcontainer-api\.io$/  // Allow webcontainer domains
+  'https://question-or-truth-frontend.onrender.com', // Add Render frontend URL
+  /\.onrender\.com$/ // Allow all Render deployments
 ];
 
 // Configure Socket.IO with updated CORS
@@ -31,6 +32,9 @@ const io = new Server(server, {
       const isAllowed = allowedOrigins.some(allowedOrigin => {
         if (allowedOrigin instanceof RegExp) {
           return allowedOrigin.test(origin);
+        }
+        if (typeof allowedOrigin === 'string' && allowedOrigin === process.env.VERCEL_URL) {
+          return origin.includes(allowedOrigin);
         }
         return allowedOrigin === origin;
       });
@@ -47,7 +51,7 @@ const io = new Server(server, {
   },
   pingTimeout: 10000,
   pingInterval: 5000,
-  transports: ['websocket', 'polling'], // Enable both WebSocket and polling
+  transports: ['websocket', 'polling'],
   allowUpgrades: true,
   upgradeTimeout: 10000,
   maxHttpBufferSize: 1e6
@@ -377,7 +381,13 @@ setInterval(() => {
   }
 }, 15 * 60 * 1000); // Check every 15 minutes
 
-const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Export for Vercel
+export default app;
+
+// Only start the server if we're not in Vercel
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 3001;
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
