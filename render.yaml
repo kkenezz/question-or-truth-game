@@ -13,7 +13,7 @@ services:
   - type: web
     name: question-or-truth-frontend
     env: static
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --legacy-peer-deps && npm run build
     staticPublishPath: ./dist
     routes:
       - type: rewrite
