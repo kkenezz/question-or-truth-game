@@ -23,6 +23,7 @@ export interface GameBoardState {
     player: number | null;
     opponent: number | null;
   };
+  bidAmount: number;  // Current bid amount
   
   // Round Management
   roundNumber: number;

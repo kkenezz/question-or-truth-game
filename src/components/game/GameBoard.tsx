@@ -5,7 +5,6 @@ import TokenDisplay from './TokenDisplay';
 import BiddingArea from './BiddingArea';
 import ActionArea from './ActionArea';
 import PlayerCards from './PlayerCards';
-import OpponentCards from './OpponentCards';
 import BidResult from './BidResult';
 import TruthGuess from './TruthGuess';
 
@@ -19,7 +18,8 @@ const GameBoard: React.FC = () => {
       currentPhase,
       roundNumber,
       selectedAction,
-      truthGuessResult
+      truthGuessResult,
+      bidAmount = 0
     }
   } = useGameStore();
 
@@ -33,58 +33,65 @@ const GameBoard: React.FC = () => {
   }, [currentPhase, selectedAction, truthGuessResult]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 max-w-3xl">
       <Card className="bg-gray-800/50 backdrop-blur-md">
-        {/* Cards Section */}
+        {/* 1. Cards Section */}
         <section className="mb-6">
           <div className="flex justify-center">
-            <div className="w-full max-w-3xl">
-              <PlayerCards />
-            </div>
+            <PlayerCards />
           </div>
         </section>
 
-        {/* Game Actions and Status Section */}
-        <section className="grid grid-cols-2 gap-4 mb-6">
-          {/* Left Column: Tokens and Status */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-center p-4 bg-gray-700/30 rounded-lg">
-              <div className="text-center">
+        {/* 2. Your Tokens Section */}
+        <section className="mb-6">
+          <div className="bg-gray-700/30 rounded-lg p-4">
+            <div className="flex items-center justify-center">
+              <div className="text-center space-y-2">
                 <h3 className="font-medium mb-2">Your Tokens</h3>
                 <div className="text-2xl font-bold text-yellow-400">{playerTokens}</div>
+                {currentPhase === 'bidding' && (
+                  <div className="text-sm">
+                    <span className="text-gray-400">After bid: </span>
+                    <span className={`font-medium ${playerTokens - bidAmount <= 5 ? 'text-red-400' : 'text-green-400'}`}>
+                      {playerTokens - bidAmount} tokens
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
-            
-            {/* Show BidResult or TruthGuess under tokens when action is selected */}
-            {selectedAction && (
-              <div>
-                <BidResult />
-                <TruthGuess />
-              </div>
-            )}
-          </div>
-
-          {/* Right Column: Action Area */}
-          <div className="flex-1">
-            {currentPhase === 'bidding' ? <BiddingArea /> : <ActionArea />}
           </div>
         </section>
 
-        {/* Token Status Section */}
-        <div className="grid grid-cols-1 gap-2 mb-6">
-          <TokenDisplay 
-            label={`${opponentName}: Token Status`}
-            tokens={opponentTokens}
-            isOpponent
-          />
-          <TokenDisplay 
-            label={`${playerName}: Token Status`}
-            tokens={playerTokens}
-            isOpponent={false}
-          />
-        </div>
+        {/* 3. Choose Your Action Section */}
+        <section className="mb-6">
+          {currentPhase === 'bidding' ? <BiddingArea /> : <ActionArea />}
+        </section>
 
-        {/* Question List Section - Always at bottom after card arrangement */}
+        {/* 4. Action Results Section */}
+        {selectedAction && (
+          <section className="mb-6">
+            <BidResult />
+            <TruthGuess />
+          </section>
+        )}
+
+        {/* 5. Token Status Section */}
+        <section className="mb-6">
+          <div className="space-y-2">
+            <TokenDisplay 
+              label={`${opponentName}: Token Status`}
+              tokens={opponentTokens}
+              isOpponent
+            />
+            <TokenDisplay 
+              label={`${playerName}: Token Status`}
+              tokens={playerTokens}
+              isOpponent={false}
+            />
+          </div>
+        </section>
+
+        {/* Question List Section */}
         <section className="mb-4">
           <div className="bg-gray-700/30 rounded-lg p-4">
             <h3 className="font-medium mb-4">Question List</h3>

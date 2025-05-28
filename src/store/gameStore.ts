@@ -28,6 +28,7 @@ interface GameState {
       correct: boolean;
       actualArrangement?: string;
     };
+    bidAmount: number;
   };
   
   // Bidding state
@@ -93,6 +94,9 @@ interface GameState {
   handleGameWin: () => void;
   handleGameLose: () => void;
   setTruthGuessResult: (result: { correct: boolean; actualArrangement?: string; } | null) => void;
+  
+  // Bid Management
+  setBidAmount: (amount: number) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -118,8 +122,9 @@ export const useGameStore = create<GameState>((set, get) => ({
       player: null,
       opponent: null,
     },
+    bidAmount: 0,
     roundNumber: 1,
-    timeRemaining: 30,
+    timeRemaining: 60,
     currentPhase: 'bidding',
     currentTurn: null,
     selectedAction: null,
@@ -373,6 +378,14 @@ export const useGameStore = create<GameState>((set, get) => ({
     gameBoardState: {
       ...state.gameBoardState,
       truthGuessResult: result || undefined,
+    }
+  })),
+  
+  // Bid Management
+  setBidAmount: (amount: number) => set((state) => ({
+    gameBoardState: {
+      ...state.gameBoardState,
+      bidAmount: amount
     }
   })),
 }));

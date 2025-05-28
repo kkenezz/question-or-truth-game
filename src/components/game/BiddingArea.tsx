@@ -21,6 +21,12 @@ const BiddingArea: React.FC = () => {
     socketService.submitBid(roomCode, bidAmount);
   };
 
+  const handleBidAmountChange = (value: number) => {
+    setBidAmount(value);
+    // Update the global game state
+    useGameStore.getState().setBidAmount(value);
+  };
+
   const hasPlayerBid = isHost ? hostBidSubmitted : guestBidSubmitted;
   const hasOpponentBid = isHost ? guestBidSubmitted : hostBidSubmitted;
 
@@ -50,29 +56,71 @@ const BiddingArea: React.FC = () => {
         </span>
       </div>
 
-      <div className="flex gap-2 items-center">
-        <input
-          type="number"
-          min={0}
-          max={playerTokens}
-          value={bidAmount}
-          onChange={(e) => setBidAmount(Math.max(0, Math.min(playerTokens, parseInt(e.target.value) || 0)))}
-          className={`
-            bg-gray-800 rounded px-3 py-2 w-24 text-center
-            ${hasPlayerBid ? 'opacity-50 cursor-not-allowed' : ''}
-          `}
-          disabled={hasPlayerBid}
-        />
-        
+      <div className="space-y-4">
+        {/* Bid Input Section */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-300">Bid Amount:</span>
+            <span className="text-sm font-medium text-yellow-400">{bidAmount}</span>
+          </div>
+          
+          {/* Slider Container */}
+          <div className="relative h-2">
+            {/* Background Track */}
+            <div className="absolute inset-0 bg-gray-600 rounded-lg"></div>
+            
+            {/* Progress Track */}
+            <div 
+              className="absolute inset-y-0 left-0 bg-yellow-400/50 rounded-l-lg"
+              style={{ width: `${(bidAmount / playerTokens) * 100}%` }}
+            ></div>
+
+            {/* Slider Input */}
+            <input
+              type="range"
+              min={0}
+              max={playerTokens}
+              value={bidAmount}
+              onChange={(e) => handleBidAmountChange(parseInt(e.target.value))}
+              disabled={hasPlayerBid}
+              className={`
+                absolute inset-0
+                w-full appearance-none bg-transparent
+                cursor-pointer disabled:cursor-not-allowed
+                [&::-webkit-slider-thumb]:appearance-none
+                [&::-webkit-slider-thumb]:w-4
+                [&::-webkit-slider-thumb]:h-4
+                [&::-webkit-slider-thumb]:rounded-full
+                [&::-webkit-slider-thumb]:bg-yellow-400
+                [&::-webkit-slider-thumb]:border-2
+                [&::-webkit-slider-thumb]:border-gray-800
+                [&::-webkit-slider-thumb]:relative
+                [&::-webkit-slider-thumb]:z-10
+                [&::-moz-range-thumb]:w-4
+                [&::-moz-range-thumb]:h-4
+                [&::-moz-range-thumb]:rounded-full
+                [&::-moz-range-thumb]:bg-yellow-400
+                [&::-moz-range-thumb]:border-2
+                [&::-moz-range-thumb]:border-gray-800
+                [&::-moz-range-thumb]:relative
+                [&::-moz-range-thumb]:z-10
+              `}
+            />
+          </div>
+        </div>
+
+        {/* Submit Button */}
         <Button 
           onClick={handleBidSubmit}
           disabled={hasPlayerBid || bidAmount < 0 || bidAmount > playerTokens}
           variant={hasPlayerBid ? 'secondary' : 'primary'}
+          className="w-full"
         >
           {hasPlayerBid ? 'Bid Submitted' : 'Confirm Bid'}
         </Button>
       </div>
 
+      {/* Bid Status */}
       <div className="flex justify-between text-sm">
         <div className="flex items-center gap-2">
           <span className={hasPlayerBid ? 'text-green-500' : 'text-gray-400'}>
