@@ -5,14 +5,26 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    include: ['lucide-react']
+    include: [
+      'lucide-react',
+      '@dnd-kit/core',
+      '@dnd-kit/modifiers',
+      '@dnd-kit/sortable',
+      '@dnd-kit/utilities'
+    ]
   },
   build: {
     rollupOptions: {
       external: [],
       output: {
         manualChunks: {
-          'lucide-icons': ['lucide-react']
+          'lucide-icons': ['lucide-react'],
+          'dnd-kit': [
+            '@dnd-kit/core',
+            '@dnd-kit/modifiers',
+            '@dnd-kit/sortable',
+            '@dnd-kit/utilities'
+          ]
         }
       }
     }
