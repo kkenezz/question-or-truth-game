@@ -13,11 +13,12 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const server = http.createServer(app);
 
-// Update CORS configuration
+// Update CORS configuration for Render
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3001',
-  /\.webcontainer-api\.io$/  // Allow webcontainer domains
+  'https://question-or-truth-frontend.onrender.com', // Add Render frontend URL
+  /\.onrender\.com$/ // Allow all Render deployments
 ];
 
 // Configure Socket.IO with updated CORS
@@ -25,9 +26,10 @@ const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      
-      // Check if the origin is allowed
+      if (!origin) {
+        return callback(null, true);
+      }
+
       const isAllowed = allowedOrigins.some(allowedOrigin => {
         if (allowedOrigin instanceof RegExp) {
           return allowedOrigin.test(origin);
@@ -42,12 +44,11 @@ const io = new Server(server, {
       }
     },
     methods: ['GET', 'POST'],
-    credentials: true,
-    allowedHeaders: ['Content-Type']
+    credentials: true
   },
   pingTimeout: 10000,
   pingInterval: 5000,
-  transports: ['websocket', 'polling'], // Enable both WebSocket and polling
+  transports: ['websocket', 'polling'],
   allowUpgrades: true,
   upgradeTimeout: 10000,
   maxHttpBufferSize: 1e6
@@ -76,13 +77,15 @@ app.use(cors({
 
 app.use(express.json());
 
-// Serve static files from the dist directory
-app.use(express.static(path.join(__dirname, '../dist')));
-
-// Serve index.html for all routes to support client-side routing
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
-});
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  const distPath = path.join(__dirname, '../dist');
+  app.use(express.static(distPath));
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
 
 // Store active rooms with additional metadata
 const rooms = new Map();
